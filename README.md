@@ -4,6 +4,8 @@ CivicPulse is a full-stack MERN (MongoDB, Express, React, Node.js) web applicati
 
 ---
 
+## Demo Video - https://drive.google.com/drive/folders/1eV5wqojt_8ydSSNate3asGj6vABNWMej?usp=sharing
+
 ## Table of Contents
 - [Project Overview](#project-overview)
 - [Screenshots & UI Walkthrough](#screenshots--ui-walkthrough)
