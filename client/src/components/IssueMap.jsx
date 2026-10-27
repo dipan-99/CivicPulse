@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, ZoomControl } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import { toLeafletCoords, DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../utils/geo';
 import { createStatusIcon, createSelectionIcon } from '../utils/markers';
@@ -57,6 +57,7 @@ export default function IssueMap({
   selectedLocation = null,
   onLocationSelect = null,
   singleIssueMode = false,
+  zoomControlPosition = 'bottomright',
 }) {
   return (
     <div
@@ -66,10 +67,12 @@ export default function IssueMap({
       <MapContainer
         center={center}
         zoom={zoom}
+        zoomControl={false}
         scrollWheelZoom={true}
         className="w-full h-full min-h-[400px] z-0"
         style={{ height: '100%', width: '100%', minHeight: '400px' }}
       >
+        <ZoomControl position={zoomControlPosition} />
         <MapResizer />
         
         <TileLayer
