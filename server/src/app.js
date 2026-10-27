@@ -8,16 +8,29 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS configuration - strict origin from CLIENT_URL env var, or allow localhost in dev
-const clientOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+// CORS configuration - strict origin from CLIENT_URL env var, allow localhost in dev, and *.vercel.app
+const rawClientOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+const normalizedClientOrigin = rawClientOrigin.replace(/\/$/, '');
+
 app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps, curl, or Postman)
       if (!origin) return callback(null, true);
-      if (origin === clientOrigin || origin === 'http://localhost:5173' || origin === 'http://127.0.0.1:5173') {
+
+      const normalizedOrigin = origin.replace(/\/$/, '');
+
+      // Allow configured CLIENT_URL, localhost, or any Vercel domain
+      if (
+        normalizedOrigin === normalizedClientOrigin ||
+        normalizedOrigin === 'http://localhost:5173' ||
+        normalizedOrigin === 'http://127.0.0.1:5173' ||
+        /^https:\/\/.*\.vercel\.app$/.test(normalizedOrigin)
+      ) {
         return callback(null, true);
       }
+
+      console.warn(`[CORS] Blocked request from origin: ${origin}`);
       return callback(new Error('CORS policy: Not allowed by CORS'));
     },
     credentials: true,
