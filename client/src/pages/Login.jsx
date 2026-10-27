@@ -73,7 +73,7 @@ export default function Login() {
       });
     } else {
       setFormData({
-        email: 'aravind@example.com',
+        email: 'aarav@example.com',
         password: 'password123',
       });
     }

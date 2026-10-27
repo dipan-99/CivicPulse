@@ -1,6 +1,9 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 require('dotenv').config();
 const app = require('./app');
 const connectDB = require('./config/db');
+const seedData = require('./seed/seed');
 
 const PORT = process.env.PORT || 5000;
 
@@ -8,6 +11,14 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+
+    // Auto-ensure demo accounts and initial reports exist
+    try {
+      await seedData({ forceClean: false });
+    } catch (seedErr) {
+      console.warn(`[CivicPulse Server] Auto-seed non-fatal warning: ${seedErr.message}`);
+    }
+
     const server = app.listen(PORT, () => {
       console.log(`[CivicPulse Server] Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });

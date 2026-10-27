@@ -1,55 +1,72 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const connectDB = require('../config/db');
 const User = require('../models/User');
 const Issue = require('../models/Issue');
 
-const seedData = async () => {
+const seedData = async (options = {}) => {
+  const { forceClean = false } = options;
   try {
     console.log('[CivicPulse Seed] Connecting to database...');
     await connectDB();
 
-    console.log('[CivicPulse Seed] Clearing existing database collections...');
-    await User.deleteMany({});
-    await Issue.deleteMany({});
+    if (forceClean) {
+      console.log('[CivicPulse Seed] Clearing existing database collections (--clean requested)...');
+      await User.deleteMany({});
+      await Issue.deleteMany({});
+    }
 
-    // 1. Create Admin Account (from env vars or defaults)
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@civicpulse.org';
+    // 1. Create or update Admin Account
+    const adminEmail = (process.env.ADMIN_EMAIL || 'admin@civicpulse.org').toLowerCase().trim();
     const adminPassword = process.env.ADMIN_PASSWORD || 'AdminSecurePass123!';
     const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
 
-    const admin = await User.create({
-      name: 'Municipal Commissioner (Admin)',
-      email: adminEmail.toLowerCase().trim(),
-      passwordHash: adminPasswordHash,
-      role: 'admin',
-    });
-    console.log(`[CivicPulse Seed] Created 1 Admin: ${admin.email}`);
+    let admin = await User.findOne({ email: adminEmail });
+    if (!admin) {
+      admin = await User.create({
+        name: 'Municipal Commissioner (Admin)',
+        email: adminEmail,
+        passwordHash: adminPasswordHash,
+        role: 'admin',
+      });
+      console.log(`[CivicPulse Seed] Created 1 Admin: ${admin.email}`);
+    } else {
+      admin.name = 'Municipal Commissioner (Admin)';
+      admin.passwordHash = adminPasswordHash;
+      admin.role = 'admin';
+      await admin.save();
+      console.log(`[CivicPulse Seed] Verified/Updated Admin: ${admin.email}`);
+    }
 
-    // 2. Create 3 Sample Citizen Accounts
+    // 2. Create or update 3 Sample Citizen Accounts
     const defaultCitizenPassword = await bcrypt.hash('password123', 10);
+    const citizenDefs = [
+      { name: 'Aarav Sharma', email: 'aarav@example.com' },
+      { name: 'Priya Venkatesh', email: 'priya@example.com' },
+      { name: 'Rohan Deshmukh', email: 'rohan@example.com' }
+    ];
 
-    const citizens = await User.create([
-      {
-        name: 'Aarav Sharma',
-        email: 'aarav@example.com',
-        passwordHash: defaultCitizenPassword,
-        role: 'citizen',
-      },
-      {
-        name: 'Priya Venkatesh',
-        email: 'priya@example.com',
-        passwordHash: defaultCitizenPassword,
-        role: 'citizen',
-      },
-      {
-        name: 'Rohan Deshmukh',
-        email: 'rohan@example.com',
-        passwordHash: defaultCitizenPassword,
-        role: 'citizen',
-      },
-    ]);
-    console.log(`[CivicPulse Seed] Created 3 Citizens: ${citizens.map((c) => c.email).join(', ')}`);
+    const citizens = [];
+    for (const cDef of citizenDefs) {
+      let cit = await User.findOne({ email: cDef.email });
+      if (!cit) {
+        cit = await User.create({
+          name: cDef.name,
+          email: cDef.email,
+          passwordHash: defaultCitizenPassword,
+          role: 'citizen',
+        });
+        console.log(`[CivicPulse Seed] Created Citizen: ${cit.email}`);
+      } else {
+        cit.passwordHash = defaultCitizenPassword;
+        cit.role = 'citizen';
+        await cit.save();
+        console.log(`[CivicPulse Seed] Verified/Updated Citizen: ${cit.email}`);
+      }
+      citizens.push(cit);
+    }
 
     const allUsers = [admin, ...citizens];
 
@@ -336,45 +353,66 @@ const seedData = async () => {
       }
     ];
 
-    console.log(`[CivicPulse Seed] Seeding ${bengaluruIssues.length} realistic Bengaluru civic issues...`);
+    const existingIssuesCount = await Issue.countDocuments();
+    if (existingIssuesCount < 5 || forceClean) {
+      console.log(`[CivicPulse Seed] Seeding realistic Bengaluru civic issues...`);
 
-    const now = Date.now();
-    for (const item of bengaluruIssues) {
-      // Map history entries with timestamps
-      const statusHistory = item.history.map((h) => ({
-        status: h.status,
-        comment: h.comment,
-        updatedBy: h.updater._id,
-        date: new Date(now - (h.offsetDays || 1) * 24 * 60 * 60 * 1000)
-      }));
+      const now = Date.now();
+      for (const item of bengaluruIssues) {
+        const existing = await Issue.findOne({ title: item.title });
+        if (existing) continue;
 
-      // Upvotes array of user ObjectIds
-      const upvotes = (item.upvoters || []).map((u) => u._id);
+        // Map history entries with timestamps
+        const statusHistory = item.history.map((h) => ({
+          status: h.status,
+          comment: h.comment,
+          updatedBy: h.updater._id,
+          date: new Date(now - (h.offsetDays || 1) * 24 * 60 * 60 * 1000)
+        }));
 
-      await Issue.create({
-        title: item.title,
-        description: item.description,
-        category: item.category,
-        imageUrl: item.imageUrl || '',
-        location: {
-          type: 'Point',
-          coordinates: item.coords // [lng, lat]
-        },
-        status: item.status,
-        createdBy: item.creator._id,
-        upvotes,
-        statusHistory,
-        createdAt: new Date(now - (item.history[0]?.offsetDays || 1) * 24 * 60 * 60 * 1000)
-      });
+        // Upvotes array of user ObjectIds
+        const upvotes = (item.upvoters || []).map((u) => u._id);
+
+        await Issue.create({
+          title: item.title,
+          description: item.description,
+          category: item.category,
+          imageUrl: item.imageUrl || '',
+          location: {
+            type: 'Point',
+            coordinates: item.coords // [lng, lat]
+          },
+          status: item.status,
+          createdBy: item.creator._id,
+          upvotes,
+          statusHistory,
+          createdAt: new Date(now - (item.history[0]?.offsetDays || 1) * 24 * 60 * 60 * 1000)
+        });
+      }
+      console.log(`[CivicPulse Seed] Seeded realistic Bengaluru civic reports.`);
+    } else {
+      console.log(`[CivicPulse Seed] Database already contains ${existingIssuesCount} issues. Keeping existing issue dataset.`);
     }
 
-    console.log(`[CivicPulse Seed] Successfully seeded 1 Admin, 3 Citizens, and ${bengaluruIssues.length} Bengaluru civic reports!`);
-    console.log('[CivicPulse Seed] Seed script complete.');
-    process.exit(0);
+    console.log('[CivicPulse Seed] Demo data check complete.');
+    return { admin, citizens };
   } catch (error) {
     console.error(`[CivicPulse Seed] Error running seed script: ${error.message}`);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedData();
+if (require.main === module) {
+  const forceClean = process.argv.includes('--clean');
+  seedData({ forceClean })
+    .then(() => {
+      console.log('[CivicPulse Seed] Standalone seed run finished.');
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}
+
+module.exports = seedData;
