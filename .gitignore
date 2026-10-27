@@ -30,3 +30,11 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Compiled binaries & local database files
+*.so
+*.dll
+*.dylib
+*.o
+mongodb_data/
+

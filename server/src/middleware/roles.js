@@ -3,19 +3,19 @@
  * Verifies that the authenticated user possesses the 'admin' role.
  */
 const adminOnly = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      message: 'Authentication required'
-    });
-  }
+    if (!req.user) {
+        return res.status(401).json({
+            message: 'Authentication required'
+        });
+    }
 
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({
-      message: 'Access forbidden: Administrator privileges required'
-    });
-  }
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({
+            message: 'Access forbidden: Administrator privileges required'
+        });
+    }
 
-  next();
+    next();
 };
 
 module.exports = { adminOnly };
