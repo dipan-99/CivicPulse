@@ -42,26 +42,28 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo & Brand */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
-              <Radio className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1">
-                Civic<span className="text-indigo-600">Pulse</span>
-              </span>
-              <p className="text-[10px] text-slate-400 font-medium -mt-1 hidden sm:block">
-                Community Issue Reporter
-              </p>
-            </div>
-          </Link>
+          {/* Logo & Brand (Extreme Left) */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+                <Radio className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <span className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1">
+                  Civic<span className="text-indigo-600">Pulse</span>
+                </span>
+                <p className="text-[10px] text-slate-400 font-medium -mt-1 hidden sm:block">
+                  Community Issue Reporter
+                </p>
+              </div>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop Navigation Links (Centered In Between) */}
+          <div className="hidden md:flex items-center justify-center gap-1.5 flex-1 px-4">
             <NavLink to="/" end className={navLinkClasses}>
               <MapPin className="w-4 h-4 text-indigo-500" />
               <span>Map</span>
@@ -94,15 +96,15 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Desktop User Profile / Auth Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop User Profile / Auth Actions (Extreme Right) */}
+          <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-xs">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-xs shadow-xs">
                     {user?.name?.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col text-left">
                     <span className="text-xs font-semibold text-slate-900 leading-tight">
                       {user?.name}
                     </span>
