@@ -17,56 +17,56 @@ import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
-            <Navbar />
-            <main className="flex-1 flex flex-col min-h-0">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/issues" element={<IssueList />} />
-                <Route path="/issues/:id" element={<IssueDetail />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+    return (
+        <BrowserRouter>
+            <AuthProvider>
+                <ToastProvider>
+                    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+                        <Navbar />
+                        <main className="flex-1 flex flex-col min-h-0">
+                            <Routes>
+                                {/* Public Routes */}
+                                <Route path="/" element={<Home />} />
+                                <Route path="/issues" element={<IssueList />} />
+                                <Route path="/issues/:id" element={<IssueDetail />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/register" element={<Register />} />
 
-                {/* Citizen Protected Routes */}
-                <Route
-                  path="/report"
-                  element={
-                    <ProtectedRoute>
-                      <ReportIssue />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/my-reports"
-                  element={
-                    <ProtectedRoute>
-                      <MyReports />
-                    </ProtectedRoute>
-                  }
-                />
+                                {/* Citizen Protected Routes */}
+                                <Route
+                                    path="/report"
+                                    element={
+                                        <ProtectedRoute>
+                                            <ReportIssue />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/my-reports"
+                                    element={
+                                        <ProtectedRoute>
+                                            <MyReports />
+                                        </ProtectedRoute>
+                                    }
+                                />
 
-                {/* Admin-Only Protected Routes */}
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  }
-                />
+                                {/* Admin-Only Protected Routes */}
+                                <Route
+                                    path="/admin"
+                                    element={
+                                        <AdminRoute>
+                                            <AdminDashboard />
+                                        </AdminRoute>
+                                    }
+                                />
 
-                {/* 404 Fallback */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  );
+                                {/* 404 Fallback */}
+                                <Route path="*" element={<NotFound />} />
+                            </Routes>
+                        </main>
+                    </div>
+                </ToastProvider>
+            </AuthProvider>
+        </BrowserRouter>
+    );
 }
