@@ -274,7 +274,7 @@ All API routes are served under `/api` and respond with consistent JSON structur
 ### Client (`client/.env`)
 | Variable Name | Required | Default / Example Value | Description |
 | :--- | :---: | :--- | :--- |
-| `VITE_API_URL` | Yes | `http://localhost:5000/api` | Base URL of the backend API |
+| `VITE_API_URL` | Yes | `http://https://civicpulse-0w1p.onrender.com/api` | Base URL of the backend API |
 
 ---
 
@@ -324,8 +324,8 @@ Open two terminal windows:
 ```bash
 cd server
 npm run dev
-# Server will run at http://localhost:5000
-# Health check available at http://localhost:5000/api/health
+# Server will run at http://https://civicpulse-0w1p.onrender.com
+# Health check available at http://https://civicpulse-0w1p.onrender.com/api/health
 ```
 
 **Terminal 2 — Frontend Client:**
